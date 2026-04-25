@@ -2,22 +2,25 @@ import { $ } from "bun";
 import { mkdir } from "fs/promises";
 import { join } from "path";
 import { platform } from "os";
+import chalk from "chalk";
 
 const osType = platform();
 const isWindows = osType === "win32";
 
-console.log(`[SYSTEM] Starting Bootstrap Installation for MediaHub on ${osType}...`);
+console.log(chalk.cyan.bold(`\n[SYSTEM] Starting Bootstrap Installation for MediaHub on ${osType}...\n`));
 
 // 1. Initialize Submodules
-console.log("[SYSTEM] Initializing and updating git submodules...");
+console.log(chalk.blueBright("[1/3] Initializing and updating git submodules..."));
 try {
-    await $`git submodule update --init --recursive`;
+    await $`git submodule update --init --recursive`.quiet();
+    console.log(chalk.green("  ✓ Submodules ready (ComfyUI, ACE-Step)."));
 } catch (e) {
-    console.error("[ERROR] Failed to init submodules. Is git installed and is this a git repo?", e);
+    console.error(chalk.red("  ✗ Failed to init submodules."), e);
 }
 
-// 2. Ensure vital directories exist (e.g., models folders so pipelines don't crash)
+// 2. Ensure vital directories exist
 const dirsToEnsure = [
+    "TextEngine/llama.cpp", // Ensure base dir exists for extraction
     "TextEngine/llama.cpp/models",
     "VisualEngine/ComfyUI/models/checkpoints",
     "VisualEngine/ComfyUI/models/loras",
@@ -31,43 +34,94 @@ const dirsToEnsure = [
 for (const dir of dirsToEnsure) {
     try {
         await mkdir(dir, { recursive: true });
-        console.log(`[SYSTEM] Ensured directory exists: ${dir}`);
     } catch (e) {
         // Ignore if already exists
     }
 }
+console.log(chalk.green("  ✓ Directory scaffolding complete."));
 
-// 3. Install Python dependencies (Virtual Envs)
-// Helper to create and install into a venv
-async function setupPythonEnv(enginePath: string, reqFile: string = "requirements.txt") {
-    console.log(`\n[SYSTEM] Setting up Python environment for ${enginePath}...`);
+// 3. Download LLaMA.cpp Pre-Compiled if missing
+const llamaPath = join("TextEngine", "llama.cpp");
+const llamaServerExe = join(llamaPath, isWindows ? "llama-server.exe" : "llama-server");
+
+const fileExists = async (path: string) => {
+    const file = Bun.file(path);
+    return await file.exists();
+};
+
+if (!(await fileExists(llamaServerExe))) {
+    console.log(chalk.yellowBright(`\n[SYSTEM] LLaMA.cpp binary not found. Downloading pre-compiled release...`));
     
+    // Fallback direct URL for the pre-compiled CUDA 12 binaries 
+    // Uses Windows cu122 by default or generic ubuntu binary for Linux
+    const downloadUrl = isWindows 
+        ? "https://github.com/ggerganov/llama.cpp/releases/download/b4120/llama-b4120-bin-win-cu1220-x64.zip"
+        : "https://github.com/ggerganov/llama.cpp/releases/download/b4120/llama-b4120-bin-ubuntu-x64.zip"; 
+    
+    const zipPath = join(llamaPath, "llama.zip");
+    
+    try {
+        console.log(chalk.dim(`  Downloading from: ${downloadUrl}`));
+        const response = await fetch(downloadUrl);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        await Bun.write(zipPath, response);
+        
+        console.log(chalk.dim(`  Extracting binary...`));
+        if (isWindows) {
+            await $`tar -xf ${zipPath} -C ${llamaPath}`.quiet();
+        } else {
+            await $`unzip -o ${zipPath} -d ${llamaPath}`.quiet();
+        }
+        
+        // Cleanup zip
+        if (isWindows) {
+            await $`del ${zipPath}`.quiet();
+        } else {
+            await $`rm ${zipPath}`.quiet();
+        }
+        console.log(chalk.green("  ✓ LLaMA.cpp successfully installed."));
+    } catch (error) {
+        console.error(chalk.red("  ✗ Failed to download/extract LLaMA.cpp:"), error);
+    }
+} else {
+    console.log(chalk.green("  ✓ LLaMA.cpp binaries already present."));
+}
+
+// 4. Install Python dependencies (Virtual Envs) in PARALLEL
+console.log(chalk.blueBright("\n[2/3] Setting up Python environments (Parallel Execution)..."));
+
+async function setupPythonEnv(enginePath: string, reqFile: string = "requirements.txt") {
     const venvPath = join(enginePath, ".venv");
     const pipCmd = isWindows ? join(venvPath, "Scripts", "pip.exe") : join(venvPath, "bin", "pip");
 
     try {
         // Create venv
-        await $`python -m venv ${venvPath}`;
-        console.log(`[SYSTEM] Created virtual environment at ${venvPath}`);
+        await $`python -m venv ${venvPath}`.quiet();
         
         // Install requirements if file exists
         const reqPath = join(enginePath, reqFile);
-        const file = Bun.file(reqPath);
-        if (await file.exists()) {
-            console.log(`[SYSTEM] Installing dependencies from ${reqFile}...`);
-            await $`${pipCmd} install -r ${reqPath}`;
+        if (await fileExists(reqPath)) {
+            await $`${pipCmd} install -r ${reqPath}`.quiet();
+            console.log(chalk.green(`  ✓ ${enginePath}: Dependencies installed.`));
         } else {
-            console.log(`[SYSTEM] No ${reqFile} found in ${enginePath}, skipping pip install.`);
+            console.log(chalk.dim(`  - ${enginePath}: No ${reqFile} found, skipped pip install.`));
         }
     } catch (error) {
-        console.error(`[ERROR] Failed to setup environment for ${enginePath}:`, error);
+        console.error(chalk.red(`  ✗ ${enginePath}: Failed to setup environment:`), error);
     }
 }
 
-// Setup environments for internal engines that require isolated python dependencies
-await setupPythonEnv("TextEngine");
-await setupPythonEnv("VisualEngine");
-await setupPythonEnv("SoundEngine");
-await setupPythonEnv("VoiceEngine");
+const engines = [
+    { path: "TextEngine", req: "requirements.txt" },
+    { path: "VisualEngine", req: "requirements.txt" },
+    { path: "SoundEngine", req: "requirements.txt" },
+    { path: "VoiceEngine", req: "requirements.txt" }
+];
 
-console.log("\n[SYSTEM] MediaHub Bootstrap Complete! All engines are primed.");
+// Execute all Python installations simultaneously
+await Promise.all(
+    engines.map(engine => setupPythonEnv(engine.path, engine.req))
+);
+
+console.log(chalk.cyan.bold("\n[3/3] MediaHub Bootstrap Complete! All engines are primed.\n"));

@@ -38,3 +38,4 @@ TextEngine/llama.cpp/*
 **/outputs/*
 **/temp/*
 **/.cache/*
+**/generations/*
