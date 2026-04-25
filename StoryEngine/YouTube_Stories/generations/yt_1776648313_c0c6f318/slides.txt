@@ -1,0 +1,9 @@
+file 'thumbnail.png'
+duration 30.660
+file 'act_1.png'
+duration 30.660
+file 'act_2.png'
+duration 30.660
+file 'act_3.png'
+duration 30.660
+file 'act_3.png'

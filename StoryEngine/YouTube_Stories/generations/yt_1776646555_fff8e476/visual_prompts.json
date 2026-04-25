@@ -1,0 +1,18 @@
+[
+    {
+        "act": "thumbnail",
+        "prompt": "Cinematic wide shot of an elderly man standing in the middle of a dark, rain-slicked city street at night, walking away from the camera. The city lights blur into bokeh in the background, creating a melancholic yet hopeful atmosphere. He is wearing a worn coat and hat, his posture shifting from burdened to upright. Intense contrast between the cold blue tones of the rain and the warm, golden glow of distant streetlights."
+    },
+    {
+        "act": "act_1",
+        "prompt": "Medium shot of an elderly man with a weary face looking out through a dirty, rain-streaked window from a high-rise apartment. The room is dimly lit, filled with shadows and dusty stacks of old papers. He is holding a yellowed, fragile letter in his hand. The mood is oppressive, somber, and heavy with the weight of decades of guilt. Cinematic lighting with deep shadows and soft, cool light coming from the city outside."
+    },
+    {
+        "act": "act_2",
+        "prompt": "Interior of a gritty, cluttered auto repair shop at night. A middle-aged mechanic with grease-stained hands and a tired expression stands by a workbench, looking at an open envelope filled with cash. Opposite him stands an older man in a long coat, his silhouette framed by the dim light of the workshop entrance. Rain is heard drumming on the corrugated metal roof. The atmosphere is tense and quiet, captured in a gritty, high-contrast photographic style."
+    },
+    {
+        "act": "act_3",
+        "prompt": "A low-angle, cinematic shot of the elderly man walking down a wet city sidewalk, moving away from the viewer. The rain is heavy, reflecting the neon lights of the city on the asphalt. He is no longer looking at his feet, but forward towards the horizon. The composition emphasizes his newfound sense of purpose. The lighting is dramatic, with cold rain falling through the warm, hazy glow of street lamps, creating a moody and hopeful final aesthetic."
+    }
+]

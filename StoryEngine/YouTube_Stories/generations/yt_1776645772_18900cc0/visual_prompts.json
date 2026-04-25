@@ -1,0 +1,10 @@
+[
+    {
+        "act": "thumbnail",
+        "prompt": "Cinematic wide shot on Avenida Paulista at dawn. A silhouette of a man with a missing thumb stands amidst the urban decay, holding a broken watch in his hand, looking towards the horizon as the first golden light hits the skyscrapers. The mood is melancholic yet resilient, high contrast, gritty textures, hyper-realistic, 8k resolution."
+    },
+    {
+        "act": "act_1",
+        "prompt": "A gritty, close-up shot at 3 AM on the pavement of Avenida Paulista. A middle-aged man with a matted beard, wearing worn-out clothes, sits leaning against a closed bank storefront. His hand is visible, missing a thumb, clutching a broken metal wristwatch. In the foreground, a discarded bottle of alcohol lies on the dirty asphalt. The lighting is cold, provided by flickering street lamps and neon signs, creating deep shadows and an atmosphere of urban despair. Cinematic photography, shallow depth of field, sharp focus on the man's weathered face and hands."
+    }
+]

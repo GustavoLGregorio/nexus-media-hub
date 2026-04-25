@@ -1,0 +1,26 @@
+[
+    {
+        "act": "thumbnail",
+        "prompt": "Cinematic wide shot of a grimy, rain-slicked cyberpunk alleyway in the Zona Sul. A protagonist with a swollen, bruised eye and a distinct limp stands in the shadows, holding a soldering iron, illuminated by the harsh, flickering pink and blue neon glow reflecting off oxidized metal walls. The atmosphere is dense with toxic smog and copper-tasting mist, highlighting a life of desperation and discarded technology."
+    },
+    {
+        "act": "act_1",
+        "prompt": "Medium close-up inside a cramped, makeshift workshop filled with tangled wires, cheap circuit boards, and rusted tools. A humble technician with a soot-covered face is soldering a damaged optic implant. Through a small, dirty window, the blurred lights of high-tech flying vehicles cast long, jagged shadows across the room. The lighting is low-key, dominated by the warm orange glow of a soldering iron and the cold, flickering neon from outside, creating a mood of fragile, illicit industry."
+    },
+    {
+        "act": "act_2",
+        "prompt": "Low-angle action shot inside a dark alleyway. A corporate security officer in pristine, high-tech black armor stands motionless, holding a glowing data chip. He looks down at the protagonist, who is hunched over a workbench cluttered with wires. The officer's visor reflects the dim, sickly neon light, emphasizing the power disparity between his polished gear and the protagonist's worn, greasy surroundings. High contrast, sharp focus on the chip exchange, cinematic atmosphere."
+    },
+    {
+        "act": "act_3",
+        "prompt": "Wide action shot of a chaotic raid. Elite police in tactical gear smash through a corrugated metal door of a workshop. Sparks fly as equipment is destroyed. The protagonist is on the floor, face bloodied and eye swollen, desperately crawling behind massive, humming industrial generators. The background is engulfed in flames and thick black smoke from burning electronics, creating a high-tension, claustrophobic environment with sharp, flickering light from the fire."
+    },
+    {
+        "act": "act_4",
+        "prompt": "Cinematic street-level shot at night. The protagonist, limping heavily and holding his bruised face, emerges from the shadows of a back alley. In the foreground, a corporate security officer stands with his back to the camera, calmly lighting a cigarette. The scene is bathed in cold, blue moonlight and harsh, flickering neon signage. The mood is one of cold betrayal and isolation, with the sprawling, decaying city architecture looming in the background."
+    },
+    {
+        "act": "act_5",
+        "prompt": "Close-up of the protagonist's weathered hands, scarred and stained with oil, meticulously twisting two frayed copper wires together in a dark, damp sub-level of the city. The only light source is a dim, flickering overhead bulb. The protagonist's face is partially obscured by shadows, revealing only a tired, cynical expression. The background is a blurred labyrinth of pipes and discarded tech, symbolizing a life hidden in the cracks of the city."
+    }
+]

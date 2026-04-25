@@ -1,0 +1,6 @@
+[submodule "VisualEngine/ComfyUI"]
+	path = VisualEngine/ComfyUI
+	url = https://github.com/comfyanonymous/ComfyUI.git
+[submodule "SoundEngine/ACE-Step-1.5"]
+	path = SoundEngine/ACE-Step-1.5
+	url = https://github.com/ace-step/ACE-Step-1.5.git

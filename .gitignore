@@ -1,0 +1,40 @@
+# OS & IDE
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Environments & Dependencies
+.venv/
+venv/
+env/
+__pycache__/
+node_modules/
+.npm/
+
+# Secrets
+.env
+*.pem
+*.key
+
+# Global AI Models & Weights
+*.safetensors
+*.gguf
+*.pt
+*.ckpt
+*.bin
+*.onnx
+
+# Explicit Ignore of all models folders anywhere, except gitkeep
+**/models/*
+!**/models/.gitkeep
+
+# Ignore llama.cpp pre-compiled binaries since they are downloaded
+TextEngine/llama.cpp/*
+!TextEngine/llama.cpp/models/
+
+# Specially ignoring outputs and cache that submodules might generate
+**/output/*
+**/outputs/*
+**/temp/*
+**/.cache/*
