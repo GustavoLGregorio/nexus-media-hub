@@ -164,4 +164,33 @@ RETURN ONLY A VALID JSON OBJECT WITH THESE 7 EXACT KEYS: "director", "writer", "
     } catch(e) {
        return { status: "error", message: String(e) };
     }
+  })
+  
+  .get("/api/projects", async () => {
+    const vaultPath = join(BASE_DIR, "ProjectVault");
+    if (!existsSync(vaultPath)) return { data: [] };
+    
+    const results = [];
+    try {
+      const entries = await readdir(vaultPath, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.isDirectory()) {
+          const configPath = join(vaultPath, entry.name, "project_config.json");
+          if (existsSync(configPath)) {
+            try {
+              const fileContent = await readFile(configPath, "utf-8");
+              const config = JSON.parse(fileContent);
+              // Fallback for missing name just in case
+              config.name = config.name || entry.name;
+              results.push(config);
+            } catch (e) {
+              // Ignore bad JSON
+            }
+          }
+        }
+      }
+      return { data: results };
+    } catch (e) {
+      return { data: [] };
+    }
   });
