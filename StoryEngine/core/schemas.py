@@ -11,13 +11,13 @@ Your JSON must strictly follow this structure:
 {
   "scaffold_plan": [
     {
+      "act_number": 1,
       "chunk_instruction": "Instructions for the writer for this act.",
       "chunk_summary_hook": "Summary of what happens in this chunk.",
-      "pacing_directive": "One of: frenetic_action, slow_monologue, dialogue_ping_pong, suspense_build, or emotional_reveal",
-      "target_word_count_estimate": 250
+      "pacing_directive": "One of: frenetic_action, slow_monologue, dialogue_ping_pong, suspense_build, or emotional_reveal"
     }
   ],
-  "cinematic_music_prompt": "Prompt for the SoundEngine. Ex: 'Dark synthwave tense loop, deep bass, 80 BPM, without vocals'"
+  "cinematic_music_prompt": "General vibe of the soundtrack requested for the entire project."
 }
 """
 
@@ -26,8 +26,7 @@ WRITER_SCHEMA_INJECTION = """
 You MUST return your response as a strict JSON object. No markdown blocks.
 Your JSON must strictly follow this structure:
 {
-  "text": "The actual written script/narrative text for the current act.",
-  "continuation_required": true or false
+  "text": "The actual creative narrative text written for the current act."
 }
 """
 
@@ -36,9 +35,19 @@ CRITIC_SCHEMA_INJECTION = """
 You MUST return your response as a strict JSON object. No markdown blocks.
 Your JSON must strictly follow this structure:
 {
-  "decision": "pass", "revise" or "reject",
-  "feedback": "Structural mechanical analysis of the text.",
-  "revised_chunk_if_revise": "If decision is 'revise', output the newly revised text here. Otherwise null."
+  "decision": "pass" | "revise",
+  "feedback": "Structural mechanical analysis, finding logic errors, AI cliches, or grammar issues.",
+  "revised_text": "If decision is 'revise', output the newly revised text here. Otherwise null."
+}
+"""
+
+AUDIENCE_SCHEMA_INJECTION = """
+!!! MANDATORY OUTPUT FORMAT !!!
+You MUST return your response as a strict JSON object. No markdown blocks.
+Your JSON must strictly follow this structure:
+{
+  "decision": "pass" | "reject",
+  "feedback": "Subjective review: does this engage the target audience? Does it have hooks? If rejecting, explain why."
 }
 """
 
@@ -47,26 +56,28 @@ ARCHIVIST_SCHEMA_INJECTION = """
 You MUST return your response as a strict JSON object. No markdown blocks.
 Your JSON must strictly follow this structure:
 {
-  "current_location": "...",
-  "character_statuses": [{"name": "...", "status": "..."}],
-  "last_concrete_action": "...",
-  "requires_continuation": true or false
+  "current_location": "Description of the physical location of this act",
+  "character_statuses": [{"name": "...", "appearance": "...", "status": "..."}],
+  "concrete_actions_in_act": "Summary of what physically happened"
 }
 """
 
 ARTIST_SCHEMA_INJECTION = """
 !!! MANDATORY OUTPUT FORMAT !!!
-You MUST return your response as a strict JSON array of objects. No markdown blocks.
-Each object must represent a visual prompt for an image generation pipeline.
+You MUST return your response as a strict JSON object. No markdown blocks.
 Your JSON must strictly follow this structure:
-[
-  {
-    "act": "thumbnail",
-    "prompt": "Visual description in English for the image generator..."
-  },
-  {
-    "act": "act_1",
-    "prompt": "Visual description in English for act 1..."
-  }
-]
+{
+  "positive_prompt": "Visual description in English for ComfyUI. Must include location and character appearance from the Archivist state.",
+  "negative_prompt": "What NOT to render in the image (e.g. text, watermark, mutated hands)."
+}
+"""
+
+COMPOSER_SCHEMA_INJECTION = """
+!!! MANDATORY OUTPUT FORMAT !!!
+You MUST return your response as a strict JSON object. No markdown blocks.
+Your JSON must strictly follow this structure:
+{
+  "ace_prompt": "Prompt for ACE-Step-1.5XL describing instruments, tempo, and mood.",
+  "lyrics": "Generated lyrics for this section, if vocal mode is enabled. Otherwise null."
+}
 """
