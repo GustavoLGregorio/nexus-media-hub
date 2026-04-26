@@ -113,6 +113,7 @@ async function setupPythonEnv(enginePath: string, reqFile: string = "requirement
 }
 
 const engines = [
+    { path: "StoryEngine", req: "requirements.txt" },
     { path: "TextEngine", req: "requirements.txt" },
     { path: "VisualEngine", req: "requirements.txt" },
     { path: "SoundEngine", req: "requirements.txt" },

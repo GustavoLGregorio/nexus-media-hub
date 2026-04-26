@@ -1,0 +1,28 @@
+{
+  "project_name": "Template_TestProject",
+  "global_config": {
+    "text_engine": {
+      "provider": "gemini", 
+      "model": "gemini-2.5-flash",
+      "local_model_path": "TextEngine/llama.cpp/models/mistral.gguf"
+    },
+    "voice_engine": {
+      "model": "qwen3-tts",
+      "voice_id": "dossie_felipe"
+    },
+    "visual_engine": {
+      "workflow_file": "VisualEngine/workflows/hyper_realistic.json"
+    }
+  },
+  "agents_persona": {
+    "director": "Você é um diretor de documentários de True Crime. Sua função é criar a estrutura de uma história fria, clínica e focada em suspense psicológico. Você não usa bordões de youtubers e foca em reter a atenção através do mistério.",
+    "archivist": "Você é um diretor de fotografia focado em hiper-realismo para a criação de imagens baseadas em fatos reais. Suas descrições (prompts) são estritamente técnicas, especificando iluminação, ângulo de câmera e estilo fotográfico RAW 8k. Nunca inclua texto nas imagens.",
+    "sound_designer": "Você é um compositor focado em atmosferas de suspense, criando prompts para geração de áudio que foquem em tons graves, drones sombrios e batidas cardíacas lentas."
+  },
+  "project_parameters": {
+    "aspect_ratio": "16:9",
+    "target_audience": "adultos",
+    "pacing": "slow_burn",
+    "language": "pt-BR"
+  }
+}
