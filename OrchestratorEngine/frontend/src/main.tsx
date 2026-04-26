@@ -10,6 +10,7 @@ import { Dashboard } from './pages/Dashboard'
 import { YouTubeEngine } from './pages/YouTubeEngine'
 import { VoiceLab } from './pages/VoiceLab'
 import { Generations } from './pages/Generations'
+import { ProjectFactory } from './pages/ProjectFactory'
 
 const queryClient = new QueryClient()
 
@@ -42,7 +43,13 @@ const generationsRoute = createRoute({
   component: Generations,
 })
 
-const routeTree = rootRoute.addChildren([indexRoute, youtubeRoute, voiceLabRoute, generationsRoute])
+const factoryRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/factory',
+  component: ProjectFactory,
+})
+
+const routeTree = rootRoute.addChildren([indexRoute, factoryRoute, youtubeRoute, voiceLabRoute, generationsRoute])
 const router = createRouter({ routeTree })
 
 declare module '@tanstack/react-router' {

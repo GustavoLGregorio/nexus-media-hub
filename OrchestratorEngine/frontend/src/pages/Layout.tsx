@@ -1,5 +1,5 @@
 import { Outlet, Link, useRouterState } from '@tanstack/react-router'
-import { Film, LayoutDashboard, PlaySquare, FolderOpen, Settings, Mic } from 'lucide-react'
+import { Film, LayoutDashboard, PlaySquare, FolderOpen, Settings, Mic, Hammer } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function Layout() {
@@ -8,6 +8,7 @@ export function Layout() {
 
   const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, path: '/' },
+    { name: 'Project Factory', icon: Hammer, path: '/factory' },
     { name: 'YouTube Engine', icon: PlaySquare, path: '/youtube' },
     { name: 'TikTok Engine', icon: Film, path: '/tiktok' },
     { name: 'Voice Lab', icon: Mic, path: '/voicelab' },
