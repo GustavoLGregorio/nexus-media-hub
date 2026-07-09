@@ -22,18 +22,41 @@ class LLMProvider:
         """Generates text from the configured provider."""
         if self.provider == "gemini":
             # Gemini expects system instructions in the model generation config or prepended.
-            # For simplicity using google-generativeai, we can prepend or use system_instruction.
-            # Modern gemini-1.5 models support system_instruction.
-            try:
-                model = genai.GenerativeModel(
-                    model_name=self.model_name,
-                    system_instruction=system_prompt
-                )
-                response = model.generate_content(user_prompt)
-                return response.text
-            except Exception as e:
-                print(f"[LLM Error - Gemini] {e}")
-                return "{}"
+            import time
+            max_retries = 5
+            base_delay = 15
+            
+            for attempt in range(max_retries):
+                try:
+                    model = genai.GenerativeModel(
+                        model_name=self.model_name,
+                        system_instruction=system_prompt
+                    )
+                    response = model.generate_content(user_prompt)
+                    return response.text
+                except Exception as e:
+                    error_str = str(e)
+                    if "429" in error_str or "Quota" in error_str:
+                        # Extrai o tempo de espera do erro se existir
+                        delay = base_delay * (attempt + 1)
+                        if "Please retry in" in error_str:
+                            try:
+                                # Extract number from "Please retry in 51.583270162s."
+                                delay_str = error_str.split("Please retry in ")[1].split("s.")[0]
+                                delay = float(delay_str) + 2 # add 2 seconds margin
+                            except:
+                                pass
+                        
+                        print(f"[LLM Error - Quota Exceeded] Attempt {attempt + 1}/{max_retries}. Sleeping for {delay:.2f} seconds...")
+                        time.sleep(delay)
+                    else:
+                        print(f"[LLM Error - Gemini] {e}")
+                        # For non-quota errors, maybe retry quickly or just fail
+                        if attempt == max_retries - 1:
+                            return "{}"
+                        time.sleep(5)
+                        
+            return "{}"
         elif self.provider == "llama.cpp":
             # Implementation for llama.cpp local inference via subprocess or HTTP server
             print(f"[LLM] Running local model from {self.local_path} (Stub)")

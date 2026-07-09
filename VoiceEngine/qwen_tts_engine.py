@@ -19,7 +19,7 @@ class QwenVoiceEngine:
         print(f"[SYSTEM] Booting up Qwen3-TTS engine onto VRAM: {self.model_id}")
         self.model = FasterQwen3TTS.from_pretrained(self.model_id)
 
-    def generate_voice(self, text: str, output_path: str, voice_prompt: str, ref_audio_path: str, ref_text: str):
+    def generate_voice(self, text: str, output_path: str, voice_prompt: str, ref_audio_path: str, ref_text: str, language: str = "English"):
         """
         Generates the voice clone leveraging the reference audio and the instruction 
         (natural language voice_prompt) without requiring pseudo-syntax.
@@ -30,11 +30,12 @@ class QwenVoiceEngine:
         print(f"[SYSTEM] Generating audio sequence...")
         print(f"[SYSTEM] Zero-Shot Reference: {os.path.basename(ref_audio_path)}")
         print(f"[SYSTEM] Prompt Intention: {voice_prompt}")
+        print(f"[SYSTEM] Language: {language}")
         
-        # Inference using zero-shot cloning across the Portuguese language
+        # Inference using zero-shot cloning across the specified language
         audio_data, sample_rate = self.model.generate_voice_clone(
             text=text,
-            language="Portuguese",
+            language=language,
             ref_audio=ref_audio_path,
             ref_text=ref_text,
         )
@@ -63,6 +64,7 @@ if __name__ == "__main__":
     parser.add_argument("--prompt", required=True)
     parser.add_argument("--ref_audio", required=True)
     parser.add_argument("--ref_text", required=True)
+    parser.add_argument("--language", default="English")
     args = parser.parse_args()
     
     engine = QwenVoiceEngine()
@@ -71,6 +73,7 @@ if __name__ == "__main__":
         output_path=args.output,
         voice_prompt=args.prompt,
         ref_audio_path=args.ref_audio,
-        ref_text=args.ref_text
+        ref_text=args.ref_text,
+        language=args.language
     )
     engine.unload()

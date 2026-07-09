@@ -68,12 +68,12 @@ export function Dashboard() {
         <h3 className="text-xl font-bold mb-4">Project Vault</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects?.map((proj: any) => (
-            <Card key={proj.name} className="hover:border-primary/50 transition-colors bg-surface_container_low group cursor-pointer relative overflow-hidden flex flex-col">
+            <Card key={proj.name} className="hover:border-primary/50 transition-colors bg-secondary/50 group cursor-pointer relative overflow-hidden flex flex-col">
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <CardTitle className="text-lg text-primary">{proj.name.replace(/_/g, ' ')}</CardTitle>
                   <span className="text-[10px] font-mono bg-primary/10 text-primary px-2 py-1 rounded-sm border border-primary/20">
-                    {proj.model.replace("gemini-", "").replace("-preview", "")}
+                    {proj.model?.replace("gemini-", "")?.replace("-preview", "") || "unknown"}
                   </span>
                 </div>
                 <CardDescription className="line-clamp-2 mt-2 h-10">
@@ -87,7 +87,7 @@ export function Dashboard() {
                   <span className="capitalize">{proj.pacing}</span>
                 </div>
                 <Link to={`/project/${proj.name}`}>
-                  <Button className="w-full bg-surface_container hover:bg-primary hover:text-on_primary transition-all text-primary border border-primary/20 group-hover:border-primary/50">
+                  <Button className="w-full bg-card hover:bg-primary hover:text-primary-foreground transition-all text-primary border border-primary/20 group-hover:border-primary/50">
                     Open Engine Console
                   </Button>
                 </Link>

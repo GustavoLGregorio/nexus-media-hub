@@ -11,12 +11,23 @@ export const wsRoutes = new Elysia()
       ws.send(JSON.stringify({ type: "CONNECTION", payload: "Connected to Nexus Orchestrator WS" }));
     },
     message(ws, message) {
-      if (message.action === "START_YOUTUBE_ENGINE") {
+      if (message.action === "START_PROJECT_ENGINE") {
         ws.send(JSON.stringify({ type: "STATUS", payload: "Starting Engine..." }));
+        
+        const config = message.config || {};
         
         // Start the background python process and bind stdout to this WS connection
         PythonRunner.runEngineStream(
-          message.config || { duration: 5, dialogueRatio: 30, rating: "Teen", localization: "Neutro", voice: "pt-BR-AntonioNeural", theme: "", isZeroShot: false },
+          {
+            projectName: config.projectName || "Unknown",
+            duration: config.duration || 5,
+            dialogueRatio: config.dialogueRatio || 30,
+            rating: config.rating || "Teen",
+            localization: config.localization || "Neutro",
+            voice: config.voice || "auto",
+            theme: config.theme || "",
+            isZeroShot: config.isZeroShot || false
+          },
           (logMsg) => {
             ws.send(JSON.stringify({ type: "LOG", payload: logMsg }));
           },

@@ -174,7 +174,8 @@ if __name__ == "__main__":
     if args.prompts_json and args.output_dir:
         generate_images_from_json(args.prompts_json, args.output_dir)
     elif args.prompt and args.output:
-        temp_json = [{"act": "thumbnail", "prompt": args.prompt}]
+        act_name = os.path.splitext(os.path.basename(args.output))[0]
+        temp_json = [{"act": act_name, "prompt": args.prompt}]
         temp_path = "temp_visual_prompts.json"
         with open(temp_path, "w", encoding="utf-8") as f:
             json.dump(temp_json, f)

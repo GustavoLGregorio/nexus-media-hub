@@ -5,10 +5,10 @@ echo ====================================================
 echo  Iniciando Nexus Media Hub - Portal v2.0
 echo ====================================================
 
-echo [1] Subindo FastAPI Backend (Porta 8000)...
-start "Nexus Backend" cmd /k "cd /d C:\Users\hukak\Nexus\MediaHub\OrchestratorEngine\backend && python server.py"
+echo [1] Subindo Bun BFF Backend (Porta 8000)...
+start "Nexus Backend" cmd /k "cd /d C:\Users\hukak\Nexus\MediaHub\OrchestratorEngine\backend_bun && bun run --watch src/index.ts"
 
-echo [3] Subindo Vite+React WebUI (Porta 5173)...
+echo [2] Subindo Vite+React WebUI (Porta 5173)...
 cd /d "C:\Users\hukak\Nexus\MediaHub\OrchestratorEngine\frontend"
 start "Nexus Frontend" cmd /k "bun run dev"
 

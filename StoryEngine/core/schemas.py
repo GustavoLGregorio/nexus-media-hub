@@ -26,7 +26,12 @@ WRITER_SCHEMA_INJECTION = """
 You MUST return your response as a strict JSON object. No markdown blocks.
 Your JSON must strictly follow this structure:
 {
-  "text": "The actual creative narrative text written for the current act."
+  "acts": [
+    {
+      "act_number": 1,
+      "text": "The actual creative narrative text written for this act."
+    }
+  ]
 }
 """
 
@@ -36,8 +41,13 @@ You MUST return your response as a strict JSON object. No markdown blocks.
 Your JSON must strictly follow this structure:
 {
   "decision": "pass" | "revise",
-  "feedback": "Structural mechanical analysis, finding logic errors, AI cliches, or grammar issues.",
-  "revised_text": "If decision is 'revise', output the newly revised text here. Otherwise null."
+  "feedback": "Structural mechanical analysis, finding logic errors, AI cliches, or grammar issues across the entire story.",
+  "revised_acts": [
+    {
+      "act_number": 1,
+      "text": "If decision is 'revise', output the newly revised text for this act here. Keep original if no revision needed."
+    }
+  ]
 }
 """
 

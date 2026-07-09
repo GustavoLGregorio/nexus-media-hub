@@ -1,11 +1,12 @@
 import os
 import sys
+import argparse
 import json
 import torch
 from transformers import pipeline
 
-def generate_vtt(audio_path, output_vtt, language='portuguese'):
-    print(f"[VTT] Generating subtitles for {audio_path}...")
+def generate_vtt(audio_path, output_vtt, language='english'):
+    print(f"[VTT] Generating subtitles for {audio_path} (Language: {language})...")
     
     device = "cuda" if torch.cuda.is_available() else "cpu"
     
@@ -21,7 +22,7 @@ def generate_vtt(audio_path, output_vtt, language='portuguese'):
         chunk_length_s=30,
         batch_size=1, # Fixed VRAM leak!
         return_timestamps="word",
-        generate_kwargs={"language": language}
+        generate_kwargs={"language": "english", "task": "transcribe"}
     )
     
     with open(output_vtt, "w", encoding="utf-8") as f:
@@ -49,6 +50,8 @@ def generate_vtt(audio_path, output_vtt, language='portuguese'):
             if end is None: end = start + 1.0 # Fallback 1 sec
             
             text = "".join([w.get("text", "") for w in cue_words]).strip()
+            # Clean up pacing punctuations (ellipses and em-dashes) from the subtitles
+            text = text.replace("...", "").replace("—", "-").replace(" .", ".").strip()
             
             def format_ts(seconds):
                 h = int(seconds // 3600)
@@ -60,7 +63,10 @@ def generate_vtt(audio_path, output_vtt, language='portuguese'):
             f.write(f"{text}\n\n")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print("Usage: python vtt_generator.py <audio_path> <output_vtt>")
-        sys.exit(1)
-    generate_vtt(sys.argv[1], sys.argv[2])
+    parser = argparse.ArgumentParser(description="Generate VTT subtitles")
+    parser.add_argument("audio_path", type=str)
+    parser.add_argument("output_vtt", type=str)
+    parser.add_argument("--language", type=str, default="portuguese", help="Language for Whisper (e.g. english, portuguese)")
+    args = parser.parse_args()
+    
+    generate_vtt(args.audio_path, args.output_vtt, args.language)

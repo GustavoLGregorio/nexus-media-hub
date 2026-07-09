@@ -6,3 +6,7 @@
 	path = SoundEngine/ACE-Step-1.5
 	url = https://github.com/ace-step/ACE-Step-1.5.git
 	ignore = dirty
+[submodule "TextEngine/llama.cpp"]
+	path = TextEngine/llama.cpp
+	url = https://github.com/ggerganov/llama.cpp.git
+	ignore = dirty

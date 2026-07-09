@@ -9,24 +9,41 @@ export class PythonRunner {
    * Spawns the story generator and streams its stdout/stderr to the provided WebSocket callback.
    */
   public static async runEngineStream(
-    config: { duration: number; dialogueRatio: number; rating: string; localization: string; voice: string; theme: string; isZeroShot: boolean },
+    config: { projectName: string; duration: number; dialogueRatio: number; rating: string; localization: string; voice: string; theme: string; isZeroShot: boolean },
     onLog: (msg: string) => void,
     onClose: (code: number | null) => void
   ) {
-    const scriptPath = join(this.YT_DIR, "scripts", "story_engine.py");
-    onLog(`[FastAPI -> Bun] Firing Log-Stream Engine: ${scriptPath} for ${config.duration} mins`);
+    const scriptPath = join(this.BASE_DIR, "master_pipeline.py");
+    const safeName = config.projectName.replace(/ /g, "_");
+    const projectConfigPath = join(this.BASE_DIR, "ProjectVault", safeName, "project_config.json");
+    
+    // Generate UUID for isolation
+    const runId = crypto.randomUUID().split('-')[0];
+    const outputDir = join(this.BASE_DIR, "ProjectVault", safeName, "generations", `${safeName}_${runId}`);
+    
+    onLog(`[FastAPI -> Bun] Firing Master Pipeline: ${scriptPath} for ${config.projectName} (Run ID: ${runId})`);
 
     try {
-      const proc = Bun.spawn(["python", "-u", scriptPath, 
-        String(config.duration), 
-        String(config.dialogueRatio), 
-        config.rating, 
-        config.localization, 
-        config.voice, 
-        config.theme, 
-        String(config.isZeroShot)
-      ], {
-        cwd: join(this.YT_DIR, "scripts"),
+      const args = [
+        "python", "-u", scriptPath, 
+        "--config", projectConfigPath,
+        "--output_dir", outputDir,
+        "--run_id", runId,
+        "--duration", String(config.duration), 
+        "--dialogue_ratio", String(config.dialogueRatio), 
+        "--rating", config.rating, 
+        "--localization", config.localization, 
+        "--voice", config.voice, 
+      ];
+      if (config.theme) {
+        args.push("--theme", config.theme);
+      }
+      if (config.isZeroShot) {
+        args.push("--zero_shot");
+      }
+
+      const proc = Bun.spawn(args, {
+        cwd: this.BASE_DIR,
         env: { ...process.env, PYTHONIOENCODING: "utf-8" },
         stdout: "pipe",
         stderr: "pipe"
@@ -48,7 +65,7 @@ export class PythonRunner {
               line = line.trim();
               if (!line) continue;
 
-              // Handle TQDM filtering (same logic as the old FastAPI)
+              // Handle TQDM filtering
               const tqdmMatch = line.match(/(\d+)%\|.*\|/);
               if (tqdmMatch) {
                 onLog(`[QWEN3 MOTOR] ${tqdmMatch[1]}% Renderizado...`);

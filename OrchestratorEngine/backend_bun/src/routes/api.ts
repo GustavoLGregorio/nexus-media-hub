@@ -193,4 +193,57 @@ RETURN ONLY A VALID JSON OBJECT WITH THESE 7 EXACT KEYS: "director", "writer", "
     } catch (e) {
       return { data: [] };
     }
+  })
+  
+  .post("/api/voices/upload", async ({ body }: { body: any }) => {
+    const { file, ref_text, gender, age, traits } = body;
+    if (!file) return { status: "error", message: "No file provided" };
+    
+    let originalName = file.name || "uploaded";
+    let baseName = originalName.substring(0, originalName.lastIndexOf('.'));
+    if (!baseName) baseName = originalName;
+    baseName = baseName.replace(/[^a-zA-Z0-9_-]/g, "_");
+    
+    const finalWavName = `${baseName}.wav`;
+    const finalWavPath = join(VOICES_DIR, finalWavName);
+    
+    const tempPath = join(VOICES_DIR, `temp_${Date.now()}_${originalName}`);
+    const arrayBuffer = await file.arrayBuffer();
+    await writeFile(tempPath, Buffer.from(arrayBuffer));
+    
+    try {
+      const proc = Bun.spawn(["ffmpeg", "-y", "-i", tempPath, finalWavPath], {
+        stdout: "ignore",
+        stderr: "ignore"
+      });
+      await proc.exited;
+      
+      const { unlink } = await import("fs/promises");
+      if (existsSync(tempPath)) {
+        await unlink(tempPath);
+      }
+      
+      const metaPath = join(VOICES_DIR, "voices_metadata.json");
+      let metadata: any[] = [];
+      if (existsSync(metaPath)) {
+        try {
+          metadata = JSON.parse(await readFile(metaPath, "utf-8"));
+        } catch(e) {}
+      }
+      
+      metadata = metadata.filter((m: any) => m.filename !== finalWavName);
+      metadata.push({
+        filename: finalWavName,
+        ref_text: ref_text || "",
+        gender: gender || "unknown",
+        age: age || "unknown",
+        traits: traits || ""
+      });
+      
+      await writeFile(metaPath, JSON.stringify(metadata, null, 2), "utf-8");
+      
+      return { status: "success", message: "Voice uploaded and converted", filename: finalWavName };
+    } catch (e) {
+      return { status: "error", message: String(e) };
+    }
   });

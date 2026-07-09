@@ -1,10 +1,24 @@
 [
-    {
-        "id": "dossie_felipe",
-        "filename": "dossie_felipe.wav",
-        "ref_text": "Colocar no envelope, amarrar na corda e desenhar qualquer coisa que quiséssemos na superfície do balão. A maioria das crianças começaram a brigar pelas diferentes cores dos balões mas eu comecei de imediato a escrever a cartinha",
-        "gender": "male",
-        "age": "young",
-        "traits": "Lenta, Séria, Narrador, Sotaque Levemente Carioca, Natural"
-    }
+  {
+    "id": "dossie_felipe",
+    "filename": "dossie_felipe.wav",
+    "ref_text": "Colocar no envelope, amarrar na corda e desenhar qualquer coisa que quiséssemos na superfície do balão. A maioria das crianças começaram a brigar pelas diferentes cores dos balões mas eu comecei de imediato a escrever a cartinha",
+    "gender": "male",
+    "age": "young",
+    "traits": "Lenta, Séria, Narrador, Sotaque Levemente Carioca, Natural"
+  },
+  {
+    "filename": "belle_delphine.wav",
+    "ref_text": "That's why I did all this podcast, was because i knew i was the biggest i was ever gonna be, i needed",
+    "gender": "female",
+    "age": "young",
+    "traits": "Young, Beautiful, Sexy, British Accent"
+  },
+  {
+    "filename": "anastacia.wav",
+    "ref_text": "I narrate naturely, giving your videos an engaging feel. People love to listen to me, since i'm new, trendy and engaging",
+    "gender": "female",
+    "age": "young",
+    "traits": "Young, Beatiful, Trendy, Engaging, British Accent"
+  }
 ]

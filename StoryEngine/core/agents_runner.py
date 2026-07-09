@@ -36,73 +36,99 @@ class AgentsRunner:
         scaffold = director_out.get("scaffold_plan", [])
         music_vibe = director_out.get("cinematic_music_prompt", "")
         
+        print(f"[StoryEngine] --- Literary Phase: Writing the entire story ---")
+        
+        approved_acts = []
+        writer_prompt = f"Scaffold Plan: {json.dumps(scaffold)}\nWrite the complete story, outputting all acts."
+        if self.parameters.get("duration"):
+            writer_prompt += f"\nTarget Audio/Read Duration: ~{self.parameters.get('duration')} minutes. You MUST write enough sentences, paragraphs, and words to fill this exact amount of time when spoken aloud. Do not summarize."
+        
+        for attempt in range(1, 4):
+            print(f"[StoryEngine] Literary Loop: Attempt {attempt}/3")
+            
+            # 1. WRITER (generates all acts)
+            writer_out = self._run_writer(writer_prompt, target_lang)
+            draft_acts = writer_out.get("acts", [])
+            
+            if not draft_acts:
+                print("[StoryEngine] Writer failed to return acts array. Retrying...")
+                continue
+                
+            # 2. CRITIC (reviews the whole story)
+            draft_text_full = json.dumps(draft_acts)
+            critic_out = self._run_critic(draft_text_full, target_lang)
+            if critic_out.get("decision") == "revise":
+                revised_acts = critic_out.get("revised_acts", [])
+                if revised_acts:
+                    draft_acts = revised_acts
+                print("[StoryEngine] Critic revised the story.")
+            else:
+                print("[StoryEngine] Critic passed the story.")
+                
+            # 3. AUDIENCE (evaluates the whole story)
+            draft_text_full = json.dumps(draft_acts) # update with revisions
+            audience_out = self._run_audience(draft_text_full, target_lang)
+            decision = audience_out.get("decision", "reject")
+            
+            if decision == "pass":
+                print("[StoryEngine] Audience APPROVED the entire story!")
+                approved_acts = draft_acts
+                
+                if attempt <= 2:
+                    self._save_to_dataset(writer_prompt, draft_text_full)
+                break
+            else:
+                print(f"[StoryEngine] Audience REJECTED: {audience_out.get('feedback')}")
+                if attempt == 3:
+                    print("[StoryEngine] Max attempts reached. Forcing acceptance to prevent infinite loop.")
+                    approved_acts = draft_acts
+                else:
+                    writer_prompt += f"\\nAudience Feedback to fix on next attempt: {audience_out.get('feedback')}"
+        
+        if not approved_acts:
+            # Fallback in case of complete failure
+            approved_acts = [{"act_number": act.get("act_number", i+1), "text": act.get("chunk_instruction", "Empty act")} for i, act in enumerate(scaffold)]
+            
+        print(f"[StoryEngine] --- Production Phase: Rendering States & Assets per Act ---")
         acts_results = []
         archivist_state = "Starting empty state."
-
+        
+        # Sequentially process acts for stateful generation
         for act in scaffold:
             act_num = act.get("act_number", len(acts_results) + 1)
-            instruction = act.get("chunk_instruction", "")
             
             print(f"[StoryEngine] --- Processing Act {act_num} ---")
             
-            approved_text = ""
-            writer_prompt = ""
-            
-            for attempt in range(1, 4):
-                print(f"[StoryEngine] Audience Loop: Attempt {attempt}/3")
-                
-                # 1. WRITER
-                writer_prompt = f"Act Instruction: {instruction}\nCurrent Archivist State: {archivist_state}"
-                writer_out = self._run_writer(writer_prompt, target_lang)
-                draft_text = writer_out.get("text", "")
-                
-                # 2. CRITIC
-                critic_out = self._run_critic(draft_text, target_lang)
-                if critic_out.get("decision") == "revise":
-                    draft_text = critic_out.get("revised_text", draft_text)
-                    print("[StoryEngine] Critic revised the text.")
-                else:
-                    print("[StoryEngine] Critic passed the text.")
-                    
-                # 3. AUDIENCE
-                audience_out = self._run_audience(draft_text, target_lang)
-                decision = audience_out.get("decision", "reject")
-                
-                if decision == "pass":
-                    print("[StoryEngine] Audience APPROVED!")
-                    approved_text = draft_text
-                    
-                    if attempt <= 2:
-                        self._save_to_dataset(writer_prompt, approved_text)
+            # Find the corresponding text from approved_acts
+            act_text = ""
+            for a in approved_acts:
+                if a.get("act_number") == act_num:
+                    act_text = a.get("text", "")
                     break
-                else:
-                    print(f"[StoryEngine] Audience REJECTED: {audience_out.get('feedback')}")
-                    if attempt == 3:
-                        print("[StoryEngine] Max attempts reached. Forcing acceptance to prevent infinite loop.")
-                        approved_text = draft_text
-                    else:
-                        instruction += f"\\nAudience Feedback to fix: {audience_out.get('feedback')}"
             
             # 4. ARCHIVIST
-            archivist_out = self._run_archivist(approved_text, archivist_state, target_lang)
+            archivist_out = self._run_archivist(act_text, archivist_state, target_lang)
             archivist_state = json.dumps(archivist_out)
             print("[StoryEngine] Archivist updated state.")
             
             # 5. ARTIST
-            artist_out = self._run_artist(approved_text, archivist_state, target_lang)
+            artist_out = self._run_artist(act_text, archivist_state, target_lang)
             print("[StoryEngine] Artist generated ComfyUI prompts.")
             
             # 6. COMPOSER
-            composer_out = self._run_composer(approved_text, music_vibe, include_vocals, target_lang)
+            composer_out = self._run_composer(act_text, music_vibe, include_vocals, target_lang)
             print("[StoryEngine] Composer generated audio prompts.")
             
             acts_results.append({
                 "act_number": act_num,
-                "text": approved_text,
+                "text": act_text,
                 "archivist_state": archivist_out,
                 "artist_prompts": artist_out,
                 "composer_prompts": composer_out
             })
+            
+            # Print the story to the UI Story Stream
+            print(f"[STORY] {act_text}")
             
         master_blueprint = {
             "project_name": self.project_name,
@@ -120,6 +146,14 @@ class AgentsRunner:
     def _run_director(self, lang):
         system = self._inject(self.personas.get("director", ""), lang, DIRECTOR_SCHEMA_INJECTION)
         user = f"Project Description: {self.parameters.get('description', '')}\\nAudience: {self.parameters.get('audience', '')}\\nPacing: {self.parameters.get('pacing', '')}"
+        
+        if self.parameters.get("theme"):
+            user += f"\\nCustom Scenario Override: {self.parameters.get('theme')}"
+        if self.parameters.get("duration"):
+            user += f"\\nTarget Duration: ~{self.parameters.get('duration')} minutes (Adapt acts to fit this time limit)"
+        if self.parameters.get("rating"):
+            user += f"\\nContent Rating: {self.parameters.get('rating')}"
+        
         return self.llm.generate_json(system, user)
 
     def _run_writer(self, context, lang):
